@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.dao.BookTypeMapper">
+    <!--图书类型列表-->
+    <select id="getBookTypeList" resultType="BookType">
+        select * from tb_booktype;
+    </select>
+    <!--图书类型修改-->
+    <update id="setBookTypeModify">
+        update tb_booktype set typename = #{typename},days=#{days} where id=#{id};
+    </update>
+    <!--查询图书类型-->
+    <select id="getBookTpye" resultType="BookType">
+        select * from tb_booktype WHERE typename=#{typename};
+    </select>
+    <!--添加-->
+    <insert id="AddBookType">
+        insert into tb_booktype (typename, days) values (#{typename},#{days});
+    </insert>
+    <!--删除-->
+    <delete id="DelBookType">
+        DELETE FROM tb_booktype WHERE id=#{id}
+    </delete>
+
+</mapper>

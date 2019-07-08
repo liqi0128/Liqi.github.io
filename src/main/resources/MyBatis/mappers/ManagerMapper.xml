@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.dao.ManagerMapper">
+    <!--用户权限列表-->
+<select id="ManagerPurviewList" resultMap="ManagerPurview">
+ select p.*,m.id m_id,m.name FROM tb_manager m LEFT JOIN tb_purview p ON m.id=p.id WHERE m.name NOT IN ("tsoft")
+</select>
+    <resultMap id="ManagerPurview" type="Manager">
+        <id property="id" column="m_id"/>
+        <association property="purview" javaType="Purview">
+            <id property="id" column="id"/>
+        </association>
+    </resultMap>
+
+    <select id="PurviewID" resultMap="ManagerPurview">
+     select p.*,m.id m_id,m.name FROM tb_manager m LEFT JOIN tb_purview p ON m.id=p.id WHERE m.id=#{id}
+    </select>
+
+    <update id="PurviewModify">
+    UPDATE tb_purview SET sysset=#{sysset},readerset=#{readerset},bookset=#{bookset},borrowback=#{borrowback},sysquery=#{sysquery} WHERE id=#{id}
+    </update>
+
+    <delete id="ManagerDel">
+    DELETE FROM tb_manager WHERE id=#{id}
+    </delete>
+
+    <delete id="PurviewDel">
+        DELETE FROM tb_purview WHERE id=#{id}
+    </delete>
+<!--添加用户-->
+    <insert id="addManager">
+    INSERT INTO tb_manager (name, PWD) VALUES (#{name},#{pwd})
+    </insert>
+    <insert id="addPurview">
+    insert into tb_purview VALUES(#{id},#{sysset},#{readerset},#{bookset},#{borrowback},#{sysquery})
+    </insert>
+    <select id="selectManager" resultType="Manager">
+        SELECT id FROM tb_manager WHERE name=#{name}
+    </select>
+
+
+
+
+</mapper>

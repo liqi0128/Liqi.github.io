@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.dao.BookBorrowMapper">
+<!--图书借阅排行榜-->
+    <select id="LoanRanking" resultMap="BorrowSort">
+select * from (SELECT bookid,count(bookid) as count FROM tb_borrow group by bookid) as borr
+  join (select b.*,c.name,p.pubname,t.typename from tb_bookinfo b
+    left join tb_bookcase c on b.bookcase=c.id
+    join tb_publishing p on b.ISBN=p.ISBN
+    join tb_booktype t on b.typeid=t.id where b.del=0) as book on borr.bookid=book.id
+order by borr.count desc limit 10
+    </select>
+    <resultMap id="BorrowSort" type="Borrow">
+    <id property="id" column="id"/>
+        <association property="bookinfo" javaType="bookinfo">
+            <id property="id" column="id"/>
+        </association>
+        <association property="bookcase" javaType="bookcase">
+            <id property="id" column="id"/>
+        </association>
+        <association property="publishing" javaType="publishing">
+            <id property="ISBN" column="ISBN"/>
+        </association>
+        <association property="booktype" javaType="booktype">
+            <id property="id" column="id"/>
+        </association>
+    </resultMap>
+    <!--统计该读者借阅数量-->
+    <select id="ConutBorrw" resultType="int">
+        select count(*) from tb_borrow WHERE readerid=#{readerid} and ifback=0;
+    </select>
+    <!--判断该图书是否已借阅-->
+    <select id="getBookBorrow" resultType="Borrow">
+        select * from tb_borrow WHERE readerid=#{readerid} AND bookid=#{bookid} AND ifback=0;
+    </select>
+    <!--添加借阅信息-->
+    <insert id="BookBorrowAdd">
+        insert into tb_borrow (readerid, bookid, borrowTime, backTime, operator,ifback)
+        values (#{readerid},#{bookid},#{borrowTime},#{backTime},#{operator},#{ifback});
+    </insert>
+    <!--读者借阅列表-->
+    <select id="getBookRenewList" resultMap="renewList">
+SELECT b.*,i.bookname ,i.price,c.`name`,t.days,p.pubname FROM tb_borrow b JOIN tb_bookinfo i on i.id=b.bookid JOIN tb_bookcase c
+on i.bookcase=c.id JOIN tb_booktype t ON i.typeid=t.id JOIN tb_publishing p ON i.ISBN=p.ISBN WHERE b.ifback=0 AND b.readerid=#{readerid}
+    </select>
+    <resultMap id="renewList" type="Borrow">
+        <id property="id" column="id"/>
+        <association property="bookinfo" javaType="bookinfo">
+            <id property="id" column="id"/>
+            <association property="bookCase" javaType="bookCase">
+                <id property="id" column="id"/>
+            </association>
+            <association property="booktype" javaType="booktype">
+                <id property="id" column="id"/>
+            </association>
+            <association property="publishing" javaType="publishing">
+                <id property="ISBN" column="ISBN"/>
+            </association>
+
+        </association>
+
+    </resultMap>
+    <!--续借更新到期时间-->
+    <update id="BorrowBackTime">
+        update tb_borrow set backTime = #{backTime} where id=#{id};
+    </update>
+    <!--归还 更新borrow表的ifback字段-->
+    <update id="setBorrowifback">
+        update tb_borrow set ifback = 1 where id=#{id};
+    </update>
+    <!--添加归还信息-->
+    <insert id="setAddGiveback">
+        insert into tb_giveback (readerid, bookid, backTime, operator)
+        values (#{readerid},#{bookid},#{backTime},#{operator});
+    </insert>
+    <!--图书借阅查询-->
+    <select id="getBorrowQuery" resultMap="borrowQuery">
+        SELECT b.id, i.barcode,i.bookname,r.barcode r_barcode,r.name,b.borrowTime,b.backTime,b.ifback,i.id i_id ,r.id r_id  from tb_borrow b
+        JOIN tb_bookinfo i ON i.id=b.bookid JOIN tb_reader r ON r.id=b.readerid
+        <where>
+            <if test="barcode != null">
+                i.barcode=#{barcode}
+            </if>
+            <if test="bookname != null">
+                and i.bookname LIKE CONCAT('%',#{bookname},'%')
+            </if>
+            <if test="readerbarcode != null">
+                and r.barcode=#{readerbarcode}
+            </if>
+            <if test="readername != null">
+                and r.name LIKE CONCAT('%',#{readername},'%')
+            </if>
+            <if test="sdate != null and edate!=null  ">
+                and b.borrowTime between #{sdate} AND #{edate}
+            </if>
+
+        </where>
+
+    </select>
+    <resultMap id="borrowQuery" type="Borrow">
+        <id property="id" column="id"/>
+        <association property="bookinfo" javaType="bookinfo">
+            <id property="id" column="i_id"/>
+            <result property="barcode" column="barcode"/>
+        </association>
+        <association property="reader" javaType="reader">
+            <id property="id" column="r_id"/>
+            <result property="barcode" column="r_barcode"/>
+        </association>
+
+    </resultMap>
+    <!--借阅到期提醒-->
+    <select id="getBremind" resultMap="borrowQuery">
+        SELECT b.id, i.barcode,i.bookname,r.barcode r_barcode,r.name,b.borrowTime,b.backTime,b.ifback,i.id i_id ,r.id r_id  from tb_borrow b
+        JOIN tb_bookinfo i ON i.id=b.bookid JOIN tb_reader r ON r.id=b.readerid WHERE b.ifback=0 AND b.backTime &lt;#{back}
+    </select>
+</mapper>

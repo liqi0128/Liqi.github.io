@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.dao.BookcaseMapper">
+    <!--书架列表-->
+    <select id="BookcaseList" resultType="Bookcase">
+    SELECT * from tb_bookcase
+    </select>
+    <!--书架修改-->
+    <update id="BookcaseModify">
+        UPDATE tb_bookcase set name=#{name} WHERE id=#{id}
+    </update>
+    <!--c查询书架名称-->
+    <select id="selectCaseName" resultType="Bookcase">
+        SELECT * from tb_bookcase WHERE name=#{name}
+    </select>
+    <!--添加书架-->
+    <insert id="BookcaseAdd">
+        insert into tb_bookcase (name) values (#{name});
+    </insert>
+    <!--删除书架-->
+    <delete id="DelBookcase">
+        DELETE FROM tb_bookcase WHERE id=#{id}
+    </delete>
+
+
+
+</mapper>

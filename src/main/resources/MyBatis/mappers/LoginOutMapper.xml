@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.dao.LoginOutMapper">
+<!--用户登陆验证-->
+    <select id="Login" resultMap="ManPurview">
+        select p.*,m.id m_id,m.name  from tb_manager m,tb_purview p where m.id=p.id and m.name=#{name} and m.pwd=#{pwd}
+    </select>
+    <resultMap type="manager" id="ManPurview">
+        <id property="id" column="m_id"/>
+        <association property="purview" javaType="purview">
+            <id property="id" column="id"/>
+        </association>
+    </resultMap>
+    <!--更改口令-->
+    <update id="pwdModify">
+        update tb_manager set PWD = #{pwd} where name=#{name};
+    </update>
+
+
+</mapper>

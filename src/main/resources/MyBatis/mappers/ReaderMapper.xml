@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.dao.ReaderMapper">
+    <!--读者档案列表-->
+    <select id="readerList" resultMap="rtype">
+        select r.*,t.name t_name,t.id t_id from tb_reader r,tb_readertype t WHERE r.typeid=t.id;
+    </select>
+    <resultMap id="rtype" type="Reader">
+        <id property="id" column="id"/>
+        <association property="readerType" javaType="readerType">
+            <id property="id" column="t_id"/>
+            <result property="name" column="t_name"/>
+        </association>
+    </resultMap>
+    <!--读者档案详情-->
+    <select id="readerId" resultMap="rtype">
+            select r.*,t.name t_name,t.id t_id from tb_reader r,tb_readertype t WHERE r.typeid=t.id and r.id=#{id};
+    </select>
+    <!--修改-->
+    <update id="updateReader">
+        update tb_reader set sex=#{sex},vocation=#{vocation},birthday=#{birthday},paperType=#{paperType},
+        paperNO=#{paperNO},tel=#{tel},email=#{email},remark=#{remark},typeid=#{typeid}  where id=#{id};
+    </update>
+    <!--查询名字-->
+    <select id="getReaderName" resultType="Reader">
+        select * from tb_reader WHERE name=#{name};
+    </select>
+    <!--添加-->
+    <insert id="AddReader">
+        insert into tb_reader (name, sex, barcode, vocation, birthday, paperType, paperNO, tel, email, createDate, operator, remark, typeid)
+        values (#{name},#{sex},#{barcode},#{vocation},#{birthday},#{paperType},#{paperNO},#{tel},#{email},#{createDate},#{operator},#{remark},#{typeid});
+    </insert>
+    <!--删除-->
+    <delete id="DelReader">
+        DELETE FROM tb_reader WHERE id=#{id}
+    </delete>
+    <!--根据读者条形码查询读者信息-->
+    <select id="ReaderCode" resultMap="rtype">
+        select r.*,t.name t_name,t.id t_id,t.number from tb_reader r,tb_readertype t WHERE r.typeid=t.id and r.barcode=#{bercode};
+    </select>
+
+</mapper>

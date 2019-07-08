@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.dao.BookMapper">
+    <!--图书列表-->
+    <select id="BookList" resultMap="info">
+        select i.*,t.id t_id,t.typename,c.id c_id, c.name,p.* from tb_bookinfo i join tb_booktype t on i.typeid=t.id
+        join tb_publishing p on i.ISBN=p.ISBN join tb_bookcase c on i.bookcase=c.id
+    </select>
+    <resultMap id="info" type="Bookinfo">
+        <id property="id" column="id"/>
+        <association property="bookCase" javaType="Bookcase" >
+            <id property="id" column="c_id"/>
+        </association>
+        <association property="publishing" javaType="publishing">
+            <id property="ISBN" column="ISBN"/>
+        </association>
+        <association property="booktype" javaType="booktype" >
+            <id property="id" column="t_id"/>
+        </association>
+    </resultMap>
+
+    <!--图书详情-->
+    <select id="getBookinfo" resultMap="info">
+        select i.*,t.id t_id,t.typename,c.id c_id, c.name,p.* from tb_bookinfo i LEFT join tb_booktype t on i.typeid=t.id
+        LEFT join tb_publishing p on i.ISBN=p.ISBN LEFT join tb_bookcase c on i.bookcase=c.id WHERE i.id=#{id}
+    </select>
+    <!--出版社列表-->
+    <select id="publishingList" resultType="Publishing">
+      SELECT * from tb_publishing
+    </select>
+    <!--图书修改-->
+    <update id="updateBookinfo">
+      update tb_bookinfo set barcode = #{barcode},bookname=#{bookname},typeid=#{typeid},author=#{author},translator=#{translator},
+      ISBN=#{ISBN},price=#{price},page=#{page},bookcase=#{bookcase} where id=#{id};
+    </update>
+    <!--查询图书-->
+    <select id="getBook" resultType="BookInfo">
+      SELECT * FROM tb_bookinfo WHERE bookcase=#{bookcase} AND  bookname=#{bookname}
+    </select>
+    <!--添加图书-->
+    <insert id="BookInfoAdd">
+        insert into tb_bookinfo (barcode, bookname, typeid, author, translator, ISBN, price, page, bookcase, inTime, operator)
+        values (#{barcode},#{bookname},#{typeid},#{author},#{translator},#{ISBN},#{price},#{page},#{bookcase},#{inTime},#{operator});
+    </insert>
+    <!--删除-->
+    <delete id="delBookInfo">
+        DELETE FROM tb_bookinfo WHERE id=#{id}
+    </delete>
+    <!--借阅图书查询-->
+    <select id="selectBookInfo" resultMap="info">
+        select i.*,t.id t_id,t.typename,c.id c_id, c.name,p.*,t.* from tb_bookinfo i LEFT join tb_booktype t on i.typeid=t.id
+        LEFT join tb_publishing p on i.ISBN=p.ISBN LEFT join tb_bookcase c on i.bookcase=c.id
+        <where>
+            <if test="barcode != null">
+                barcode=#{barcode}
+            </if>
+
+            <if test="bookname != null">
+                and bookname LIKE CONCAT('%',#{bookname},'%')
+            </if>
+        </where>
+    </select>
+<!--动态查询，图书档案查询-->
+    <select id="getBookQuery" resultMap="info" parameterType="map">
+        select i.*,t.id t_id,t.typename,c.id c_id, c.name,p.* from tb_bookinfo i join tb_booktype t on i.typeid=t.id
+        join tb_publishing p on i.ISBN=p.ISBN join tb_bookcase c on i.bookcase=c.id
+        <where>
+            <if test="barcode != null">
+                i.barcode=#{barcode}
+            </if>
+
+            <if test="bookname != null">
+                and i.bookname LIKE CONCAT('%',#{bookname},'%')
+            </if>
+
+            <if test="typename != null">
+                and t.typename LIKE CONCAT('%',#{typename},'%')
+            </if>
+
+            <if test="author != null">
+                and i.author LIKE CONCAT('%',#{author},'%')
+            </if>
+
+            <if test="publishing != null">
+                and p.pubname LIKE CONCAT('%',#{publishing},'%')
+            </if>
+
+            <if test="bookcase != null">
+                and c.name LIKE CONCAT('%',#{bookcase},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>
